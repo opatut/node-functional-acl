@@ -12,7 +12,6 @@ function _createRuleFactory(result) {
     // the actual rule
     return function ruleFactory(...predicates) {
         function rule(context) {
-            console.log('running rule: ', rule.ruleName);
             // iterate over all predicates, see if they match
             for (let predicate of predicates) {
                 // if the predicate does not match, the full rule does not
@@ -38,13 +37,28 @@ function _enhanceRule(rule, ruleName) {
     return rule;
 }
 
+
+//  (...predicates) => predicate
+export function all(...predicates) {
+    return (...args) => predicates.every((predicate) => predicate(...args));
+}
+
+export function any(...predicates) {
+    return (...args) => predicates.some((predicate) => predicate(...args));
+}
+
+export function none(...predicates) {
+    return (...args) => predicates.every((predicate) => !predicate(...args));
+}
+
+//  (...predicates) => rule
 export const allow = _createRuleFactory(true);
 export const deny = _createRuleFactory(false);
 
 // combines rules to a single rule: "build" the ACL
+// (...rule) => rule
 export function build(...rules) {
     const combinedRule = (context) => {
-        console.log('running rule: ', combinedRule.ruleName);
         for (let rule of rules) {
             const result = rule(context);
             if (result !== null) {

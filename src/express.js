@@ -4,19 +4,18 @@ export default function createMiddlewareFactory(options) {
     const {
         // Denial handler, used by the default 'applyRule'.
         // If none supplied, will throw `ACLRejectionError`.
-        onDeny = null,
+        onDeny = (rule, context, req, res, next) => {
+            throw new ACLRejectionError(rule, context);
+        },
 
-        applyRule = (rule, directContext, extractedContext, req, res, next) => {
-            const context = {...extractedContext, ...directContext};
-
-            console.log('context', context);
+        applyRule = (rule, directContext, derivedContext, req, res, next) => {
+            const context = {
+                ...derivedContext,
+                ...directContext
+            };
 
             if (!rule(context)) {
-                if (onDeny) {
-                    onDeny(rule, context, req, res, next);
-                } else {
-                    next(new ACLRejectionError(rule, context));
-                }
+                onDeny(rule, context, req, res, next);
             }
         },
 
