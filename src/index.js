@@ -11,19 +11,15 @@ export class ACLRejectionError extends Error {
 function _createRuleFactory(result) {
     // the actual rule
     return function ruleFactory(...predicates) {
-        function rule(context) {
-            // iterate over all predicates, see if they match
-            for (let predicate of predicates) {
-                // if the predicate does not match, the full rule does not
-                // matche -> return null
-                if (!predicate(context)) {
-                    return null;
-                }
-            }
+        // all predicates have to match, by default
+        const predicate = all(...predicates);
 
-            // all predicates match -> return the result (true for allow, false for deny)
-            return result;
+        function rule(context) {
+            // if all predicates match -> return the result (true for allow, false for deny)
+            // otherwise -> return null (try next rule)
+            return predicate(context) ? result : null;
         }
+
         const ruleName = (result ? 'allow:' : 'deny:') +
             predicates.map((predicate) => predicate.ruleName || predicate.name).join(',');
         return _enhanceRule(rule, ruleName);
