@@ -46,6 +46,7 @@ export function any(...predicates) {
 export function none(...predicates) {
     return (...args) => predicates.every((predicate) => !predicate(...args));
 }
+export const not = none; // alias
 
 //  (...predicates) => rule
 export const allow = _createRuleFactory(true);
