@@ -10,10 +10,7 @@ export class ACLRejectionError extends Error {
 
 function _createRuleFactory(result) {
     // the actual rule
-    return function ruleFactory(...predicates) {
-        // all predicates have to match, by default
-        const predicate = all(...predicates);
-
+    return function ruleFactory(predicate) {
         function rule(context) {
             // if all predicates match -> return the result (true for allow, false for deny)
             // otherwise -> return null (try next rule)
@@ -48,7 +45,7 @@ export function none(...predicates) {
 }
 export const not = none; // alias
 
-//  (...predicates) => rule
+//  (predicate) => rule
 export const allow = _createRuleFactory(true);
 export const deny = _createRuleFactory(false);
 

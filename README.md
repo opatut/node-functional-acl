@@ -57,14 +57,14 @@ Create a predicate that matches if at least one of the predicates matches.
 #### `none(...predicates) => predicate`
 Create a predicate that matches if none of the predicates matches
 
-#### `allow(...predicates) => rule`
-Create a rule that returns true if all of the predicates match.
+#### `allow(predicate) => rule`
+Create a rule that returns true if the predicate matches.
     
-#### `deny(...predicates) => rule`
-create a rule that returns false if all of the predicates match
+#### `deny(predicate) => rule`
+Create a rule that returns false if the predicate matches.
     
 #### `build(...rules) => rule`
-create a rule that returns the result of the first matching rule, or null if none matches
+Create a rule that returns the result of the first matching rule, or null if none matches
     
 #### `enforce(rule, context) => undefined`
 Throws an `ACLRejectionError` if the `rule` rejects the `context`, or does not decide on the `context` (i.e. returns `null`).
