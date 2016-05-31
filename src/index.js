@@ -30,6 +30,11 @@ function _enhanceRule(rule, ruleName) {
     return rule;
 }
 
+export const not = (predicate) => (...args) => !predicate(...args);
+
+// everyone needs those :)
+export const never = () => false;
+export const always = () => true;
 
 //  (...predicates) => predicate
 export function all(...predicates) {
@@ -41,9 +46,8 @@ export function any(...predicates) {
 }
 
 export function none(...predicates) {
-    return (...args) => predicates.every((predicate) => !predicate(...args));
+    return all(predicates.map(not));
 }
-export const not = none; // alias
 
 //  (predicate) => rule
 export const allow = _createRuleFactory(true);
@@ -72,4 +76,3 @@ export function enforce(rule, context) {
         throw new ACLRejectionError(rule, context);
     }
 }
-

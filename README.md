@@ -48,6 +48,15 @@ Multiple rules can be combined using the `build(...rules)` function. These are t
 
 ## API
 
+#### `not(predicate) => predicate`
+Create a predicate that matches if the original predicate did not match.
+
+#### `always() => true`
+Predicate that always matches.
+
+#### `never() => false`
+Predicate that never matches.
+
 #### `all(...predicates) => predicate`
 Create a predicate that matches if all predicates match.
     

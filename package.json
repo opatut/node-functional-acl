@@ -1,6 +1,6 @@
 {
   "name": "functional-acl",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A functional implementation of access control lists (ACLs)",
   "main": "index.js",
   "scripts": {
