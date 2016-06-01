@@ -1,78 +1,143 @@
-export class ACLRejectionError extends Error {
-    constructor(rule, context) {
-        const message = `ACL rejected: ${rule.ruleName}`;
-        super(message);
-        this.name = this.constructor.name;
-        this.message = message;
-        Error.captureStackTrace(this, this.constructor.ruleName)
-    }
+// ----------------------------------------------------------------------------
+// -- Predefined predicates
+// ----------------------------------------------------------------------------
+
+/**
+  * Predicate that never matches.
+  */
+export function never() {
+  return false;
 }
 
-function _createRuleFactory(result) {
-    // the actual rule
-    return function ruleFactory(predicate) {
-        function rule(context) {
-            // if all predicates match -> return the result (true for allow, false for deny)
-            // otherwise -> return null (try next rule)
-            return predicate(context) ? result : null;
-        }
-
-        const ruleName = (result ? 'allow:' : 'deny:') +
-            predicates.map((predicate) => predicate.ruleName || predicate.name).join(',');
-        return _enhanceRule(rule, ruleName);
-    }
+/**
+  * Predicate that always matches.
+  */
+export function always() {
+  return true;
 }
 
-function _enhanceRule(rule, ruleName) {
-    rule.enforce = (context) => enforce(rule, context);
-    rule.extend = (...others) => build(rule, ...others);
-    rule.ruleName = ruleName || 'unnamed_rule';
-    return rule;
+
+// ----------------------------------------------------------------------------
+// -- Predicate helpers & combinators
+// ----------------------------------------------------------------------------
+
+/**
+  * Create a predicate that matches if the original predicate did not match.
+  */
+export function not(predicate) {
+  return (...args) => !predicate(...args);
 }
 
-export const not = (predicate) => (...args) => !predicate(...args);
-
-// everyone needs those :)
-export const never = () => false;
-export const always = () => true;
-
-//  (...predicates) => predicate
+/**
+  * Create a predicate that matches if all predicates match.
+  */
 export function all(...predicates) {
-    return (...args) => predicates.every((predicate) => predicate(...args));
+  return (...args) => predicates.every((predicate) => predicate(...args));
 }
 
+/**
+  * Create a predicate that matches if none of the predicates matches
+  */
 export function any(...predicates) {
-    return (...args) => predicates.some((predicate) => predicate(...args));
+  return (...args) => predicates.some((predicate) => predicate(...args));
 }
 
+/**
+  */
 export function none(...predicates) {
-    return all(predicates.map(not));
+  return not(any(...predicates));
 }
 
-//  (predicate) => rule
-export const allow = _createRuleFactory(true);
-export const deny = _createRuleFactory(false);
+// ----------------------------------------------------------------------------
+// -- Predicate -> Rule converters
+// ----------------------------------------------------------------------------
 
-// combines rules to a single rule: "build" the ACL
-// (...rule) => rule
-export function build(...rules) {
-    const combinedRule = (context) => {
-        for (let rule of rules) {
-            const result = rule(context);
-            if (result !== null) {
-                return result;
-            }
-        }
-        return null; // so this can be used as a rule again
-    }
-
-    const ruleName = '( ' + rules.map((rule) => rule.ruleName).join(' | ') + ' )';
-    return _enhanceRule(combinedRule, ruleName);
+/**
+  * Create a rule that returns true if the predicate matches.
+  */
+export function allow(predicate) {
+  return (...args) => (!predicate || predicate(...args)) ? true : null;
 }
 
-// enforces that the rule matches
-export function enforce(rule, context) {
-    if (!rule(context)) {
-        throw new ACLRejectionError(rule, context);
+/**
+  * Create a rule that returns false if the predicate matches.
+  */
+export function deny(predicate) {
+  return (...args) => (!predicate || predicate(...args)) ? false : null;
+}
+
+// ----------------------------------------------------------------------------
+// -- Rule helpers
+// ----------------------------------------------------------------------------
+
+/**
+  * Create a rule that allows if the original rule would deny, and vice versa.
+  * Does not decide if the original rule wouldn't.
+  */
+export function invert(rule) {
+  return (...args) => {
+    const result = rule(...args);
+    return result === null ? null : !result;
+  };
+}
+
+/**
+  * Create a rule that is triggered only if the predicate matches, and if the
+  * rule does not decide, return the `undecidedResult`.
+  */
+export function forceDecisionIf(predicate, rule, undecidedResult = false) {
+  return (...args) => {
+    if (predicate(...args)) {
+      const result = rule(...args);
+      return result === null ? undecidedResult : result;
     }
+    return null;
+  };
+}
+
+// ----------------------------------------------------------------------------
+// -- The main thing :)
+// ----------------------------------------------------------------------------
+
+/**
+  * Create a rule that returns the result of the first matching rule, or `null` if
+  * none matches.
+  */
+export function combineRules(...rules) {
+  return (...args) => {
+    for (const rule of rules) {
+      const result = rule(...args);
+      if (result !== null) {
+        return result;
+      }
+    }
+    return null;
+  };
+}
+
+// ----------------------------------------------------------------------------
+// -- And a small helper
+// ----------------------------------------------------------------------------
+
+export class ACLRejectionError extends Error {
+  constructor(rule, ...args) {
+    const message = 'ACL rejected';
+    super(message);
+    this.name = this.constructor.name;
+    this.message = message;
+    this.args = args;
+    Error.captureStackTrace(this, this.constructor.ruleName);
+  }
+}
+
+/**
+  * Throws an `ACLRejectionError` if the `rule` rejects the `context`, or does
+  * not decide on the `context` (i.e. returns `null`).
+  */
+export function enforce(rule, ...args) {
+  const result = rule(...args);
+  if (!result) {
+    throw new ACLRejectionError(rule, ...args);
+  }
+  return result;
 }

@@ -1,6 +1,0 @@
-src/
-examples/
-npm-debug.log
-.npmignore
-.babelrc
-*.tgz

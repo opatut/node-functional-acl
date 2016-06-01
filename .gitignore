@@ -1,5 +1,2 @@
-index.js
-express.js
-!src/*
-!examples/*
+lib/
 npm-debug.log

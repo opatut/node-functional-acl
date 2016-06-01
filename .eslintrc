@@ -1,0 +1,6 @@
+{
+  "extends": "wish-technology",
+  "rules": {
+    "no-console": 0
+  }
+}
