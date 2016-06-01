@@ -1,6 +1,6 @@
 # Functional Access Control Lists (node-functional-acl)
 
-## About 
+## About
 
 From Wikipedia:
 
@@ -52,10 +52,9 @@ condition. Returns true or false. Examples:
 
 A function that returns one of `true` (allow), `false` (deny) or `null`
 (proceed with next rule) for a context. These rules can be easily built from
-predicates using the `allow(...predicates)` and `deny(...predicates)`
-functions. They require all predicates to match on the context for the rule to
-match, and then return the appropriate boolean value, or `null` if any of the
-predicates does not match.
+predicates using the `allow(predicate)` and `deny(predicate)`
+functions. If the predicate matches on the context, they return the appropriate
+boolean value, and `null` otherwise.
 
 Multiple rules can be combined using the `combineRules(...rules)` function.
 These are then tested in order, the first rule that matches decides the result
@@ -83,11 +82,11 @@ Predicate that never matches.
 #### `all(...predicates) => predicate`
 
 Create a predicate that matches if all predicates match.
-    
+
 #### `any(...predicates) => predicate`
 
 Create a predicate that matches if at least one of the predicates matches.
-    
+
 #### `none(...predicates) => predicate`
 
 Create a predicate that matches if none of the predicates matches
@@ -95,21 +94,21 @@ Create a predicate that matches if none of the predicates matches
 #### `allow(predicate) => rule`
 
 Create a rule that returns true if the predicate matches.
-    
+
 #### `deny(predicate) => rule`
 
 Create a rule that returns false if the predicate matches.
-    
+
 #### `combineRules(...rules) => rule`
 
 Create a rule that returns the result of the first matching rule, or null if
 none matches
-    
+
 #### `forceDecisionIf(predicate, rule, undecidedResult = false) => rule`
 
 Create a rule that is triggered only if the predicate matches, and if the rule
 does not decide, return the `undecidedResult`.
-    
+
 #### `enforce(rule, context) => undefined`
 
 Throws an `ACLRejectionError` if the `rule` rejects the `context`, or does not
@@ -121,7 +120,7 @@ name). This would look something like:
 
     const myRule = combineRules(...);
     const myContext = { user: ..., operation: ..., foo: ... };
-    
+
     if (!myRule(myContext)) {
         console.warn('You are denied access.');
     } else {
@@ -132,22 +131,22 @@ name). This would look something like:
 ## Complete example
 
     import {combineRules, deny, allow} from '../src';
-    
+
     const admins = ({user}) => user && user.isAdmin;
     const guests = ({user}) => !user;
     const reading = ({operation}) => operation === 'read';
     const writing = ({operation}) => operation === 'write';
-    
+
     const restricted = combineRules(
         deny(guests),       // guests may not ever read
         allow(admins),      // admins may do everything
         allow(reading),     // everyone else may read
     );
-    
+
     // now you can check permissions simply by calling
     const context = {user: myUser, operation: 'read'};
     const allowed = restricted(context);
-    
+
     // or enforce a permission (throw ACLRejectedError otherwise)
     enforce(restricted, context);
 
@@ -157,15 +156,15 @@ There is a helper in `functional-acl/express` that creates a customized
 middleware factory. Sounds complicated? It's not! Here we go:
 
     import aclExpress from 'functional-acl/express';
-    
+
     // our middleware factory is called 'applyAcl'
     const applyACL = aclExpress({
         deriveContext(req) { return { user: req.user; }},
         createDirectContext(operation) { return { operation }},
     });
-    
+
     app.use(authMiddleware); // inject req.user
-    
+
     // check "myRule" with {user: req.user, operation: 'read'}
     app.get('/', applyACL(myRule, 'read'), myRoute);
 
