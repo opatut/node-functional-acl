@@ -55,17 +55,17 @@ describe('Predicate helpers & cominators', () => {
     assert(isLoggedIn({user: pete}));
   });
 
-  it('all(...predicates)', () => {
-    assert(typeof ACL.all === 'function');
+  it('every(...predicates)', () => {
+    assert(typeof ACL.every === 'function');
 
-    const steveReads = ACL.all(read, isSteve);
+    const steveReads = ACL.every(read, isSteve);
     assert(typeof steveReads === 'function');
     assert(steveReads({user: steve, op: 'read'}));
     assert(!steveReads({user: pete, op: 'read'}));
     assert(!steveReads({user: steve, op: 'write'}));
     assert(!steveReads({}));
 
-    const stillNever = ACL.all(ACL.never, isSteve);
+    const stillNever = ACL.every(ACL.never, isSteve);
     assert(typeof stillNever === 'function');
     assert(!stillNever({user: steve, op: 'read'}));
     assert(!stillNever({user: pete, op: 'read'}));
@@ -73,10 +73,10 @@ describe('Predicate helpers & cominators', () => {
     assert(!stillNever({}));
   });
 
-  it('any(...predicates)', () => {
-    assert(typeof ACL.any === 'function');
+  it('some(...predicates)', () => {
+    assert(typeof ACL.some === 'function');
 
-    const steveOrReads = ACL.any(read, isSteve);
+    const steveOrReads = ACL.some(read, isSteve);
     assert(typeof steveOrReads === 'function');
     assert(steveOrReads({user: steve, op: 'read'}));
     assert(steveOrReads({user: pete, op: 'read'}));

@@ -79,11 +79,11 @@ Predicate that always matches.
 
 Predicate that never matches.
 
-#### `all(...predicates) => predicate`
+#### `every(...predicates) => predicate`
 
 Create a predicate that matches if all predicates match.
 
-#### `any(...predicates) => predicate`
+#### `some(...predicates) => predicate`
 
 Create a predicate that matches if at least one of the predicates matches.
 

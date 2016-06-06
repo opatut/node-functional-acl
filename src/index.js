@@ -29,23 +29,23 @@ export function not(predicate) {
 }
 
 /**
-  * Create a predicate that matches if all predicates match.
+  * Create a predicate that matches if every predicates match.
   */
-export function all(...predicates) {
+export function every(...predicates) {
   return (...args) => predicates.every((predicate) => predicate(...args));
 }
 
 /**
   * Create a predicate that matches if none of the predicates matches
   */
-export function any(...predicates) {
+export function some(...predicates) {
   return (...args) => predicates.some((predicate) => predicate(...args));
 }
 
 /**
   */
 export function none(...predicates) {
-  return not(any(...predicates));
+  return not(some(...predicates));
 }
 
 // ----------------------------------------------------------------------------
