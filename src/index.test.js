@@ -1,19 +1,34 @@
+// @flow
+
+declare function describe(): any;
+declare function it(): any;
+
+// flow-disable-next-line
 import assert from 'power-assert';
 
 import * as ACL from './index';
+import type {TPredicate} from './index';
 
-const isGuest = ({user}) => !user;
-const isAdmin = ({user}) => user && user.isAdmin;
-const isSteve = ({user}) => user && user.name === 'steve';
+type TTestContext = {
+  user?: {
+    name?: string,
+    isAdmin?: boolean,
+  },
+  op?: string,
+};
 
-const read = ({op}) => op === 'read';
-const write = ({op}) => op === 'write';
+const isGuest: TPredicate<TTestContext> = ({user}: TTestContext) => !user;
+const isAdmin: TPredicate<TTestContext> = ({user}: TTestContext) => !!user && !!user.isAdmin;
+const isSteve: TPredicate<TTestContext> = ({user}: TTestContext) => !!user && user.name === 'steve';
+
+const read: TPredicate<TTestContext> = ({op}: TTestContext) => op === 'read';
+const write: TPredicate<TTestContext> = ({op}: TTestContext) => op === 'write';
 
 const pete = {isAdmin: true, name: 'pete'};
 const steve = {isAdmin: false, name: 'steve'};
 
-describe('Test Fixtures', () => {
-  it('predicates', () => {
+describe('Test Fixtures', (): void => {
+  it('predicates', (): void => {
     assert(isGuest({}));
     assert(!isGuest({user: pete}));
 
@@ -33,20 +48,20 @@ describe('Test Fixtures', () => {
   });
 });
 
-describe('Predefined predicates', () => {
-  it('never()', () => {
+describe('Predefined predicates', (): void => {
+  it('never()', (): void => {
     assert(typeof ACL.never === 'function');
     assert(ACL.never() === false);
   });
 
-  it('always()', () => {
+  it('always()', (): void => {
     assert(typeof ACL.always === 'function');
     assert(ACL.always() === true);
   });
 });
 
-describe('Predicate helpers & cominators', () => {
-  it('not(predicate)', () => {
+describe('Predicate helpers & cominators', (): void => {
+  it('not(predicate)', (): void => {
     assert(typeof ACL.not === 'function');
 
     const isLoggedIn = ACL.not(isGuest);
@@ -55,7 +70,7 @@ describe('Predicate helpers & cominators', () => {
     assert(isLoggedIn({user: pete}));
   });
 
-  it('every(...predicates)', () => {
+  it('every(...predicates)', (): void => {
     assert(typeof ACL.every === 'function');
 
     const steveReads = ACL.every(read, isSteve);
@@ -73,7 +88,7 @@ describe('Predicate helpers & cominators', () => {
     assert(!stillNever({}));
   });
 
-  it('some(...predicates)', () => {
+  it('some(...predicates)', (): void => {
     assert(typeof ACL.some === 'function');
 
     const steveOrReads = ACL.some(read, isSteve);
@@ -85,7 +100,7 @@ describe('Predicate helpers & cominators', () => {
     assert(!steveOrReads({}));
   });
 
-  it('none(...predicates)', () => {
+  it('none(...predicates)', (): void => {
     assert(typeof ACL.none === 'function');
 
     const neitherSteveNorReads = ACL.none(read, isSteve);
@@ -98,8 +113,8 @@ describe('Predicate helpers & cominators', () => {
   });
 });
 
-describe('Predicate -> Rule converters', () => {
-  it('allow(predicate)', () => {
+describe('Predicate -> Rule converters', (): void => {
+  it('allow(predicate)', (): void => {
     assert(typeof ACL.allow === 'function');
 
     const allowSteve = ACL.allow(isSteve);
@@ -112,7 +127,7 @@ describe('Predicate -> Rule converters', () => {
     assert(allowAlways() === true);
   });
 
-  it('deny(predicate)', () => {
+  it('deny(predicate)', (): void => {
     assert(typeof ACL.deny === 'function');
 
     const denySteve = ACL.deny(isSteve);
@@ -126,8 +141,8 @@ describe('Predicate -> Rule converters', () => {
   });
 });
 
-describe('Rule helpers', () => {
-  it('invert(rule)', () => {
+describe('Rule helpers', (): void => {
+  it('invert(rule)', (): void => {
     assert(typeof ACL.invert === 'function');
 
     const denySteve = ACL.invert(ACL.allow(isSteve));
@@ -136,7 +151,7 @@ describe('Rule helpers', () => {
     assert(denySteve({user: pete}) === null);
   });
 
-  it('forceDecisionIf(predicate, rule, undecidedResult)', () => {
+  it('forceDecisionIf(predicate, rule, undecidedResult)', (): void => {
     assert(typeof ACL.forceDecisionIf === 'function');
 
     const ifReadAllowSteveOrDeny = ACL.forceDecisionIf(read, ACL.allow(isSteve), false);
@@ -159,8 +174,8 @@ describe('Rule helpers', () => {
   });
 });
 
-describe('The main thing :)', () => {
-  it('combineRules(...rules)', () => {
+describe('The main thing :)', (): void => {
+  it('combineRules(...rules)', (): void => {
     assert(typeof ACL.combineRules === 'function');
 
     const combined1 = ACL.combineRules(
@@ -186,8 +201,8 @@ describe('The main thing :)', () => {
   });
 });
 
-describe('And a small helper', () => {
-  it('enforce(rule, context)', () => {
+describe('And a small helper', (): void => {
+  it('enforce(rule, context)', (): void => {
     assert(typeof ACL.enforce === 'function');
 
     const rule = ACL.allow(read);

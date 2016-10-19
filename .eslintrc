@@ -1,6 +1,59 @@
 {
-  "extends": "wish-technology",
-  "rules": {
-    "no-console": 0
+  "parser": "babel-eslint",
+  plugins: ["babel", "flowtype"],
+  extends: "airbnb",
+  rules: {
+    "no-console": 0,
+    "arrow-body-style": 0,
+    "babel/arrow-parens": 2,
+    "babel/object-curly-spacing": 2,
+    "babel/object-shorthand": 2,
+    "block-scoped-var": 0,
+    "id-length": 0,
+    "jsx-quotes": [2, "prefer-single"],
+    "max-len": 0,
+    "new-cap": 0,
+    "no-confusing-arrow": 0,
+    "no-dupe-keys": 2,
+    "no-else-return": 0,
+    "no-multi-spaces": 2,
+    "no-duplicate-imports": 0,
+    "import/no-duplicates": 2,
+    "no-nested-ternary": 0,
+    "no-param-reassign": ["error", {props: false}],
+    "no-underscore-dangle": 0,
+    "no-unused-expressions": 0,
+    "object-curly-spacing": 0,
+    "one-var": 0,
+    "prefer-arrow-callback": 2,
+    "prefer-template": 2,
+    "quotes": ["error", "single", "avoid-escape"],
+    "space-before-function-paren": ["error", "never"],
+    "spaced-comment": 0,
+    "vars-on-top": 0,
+    "flowtype/define-flow-type": 2,
+    "flowtype/require-parameter-type": [2, {excludeArrowFunctions: "expressionsOnly"}],
+    "flowtype/require-return-type": [2, "always", {excludeArrowFunctions: "expressionsOnly", annotateUndefined: "always"}],
+    "flowtype/require-valid-file-annotation": [2, "always"],
+    "flowtype/space-after-type-colon": [2, "always"],
+    "flowtype/space-before-type-colon": [2, "never"],
+    "flowtype/type-id-match": [2, "^T([A-Z][a-z0-9]*)+$"],
+    "flowtype/use-flow-type": 2,
+    "flowtype/valid-syntax": 2
+  },
+  settings: {
+    "flowtype": {
+      onlyFilesWithFlowAnnotation: false
+    }
+  },
+  globals: {
+    "after": false,
+    "afterEach": false,
+    "assert": false,
+    "before": false,
+    "beforeEach": false,
+    "describe": false,
+    "expect": false,
+    "it": false
   }
 }
